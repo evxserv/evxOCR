@@ -1,3 +1,4 @@
+// EVXOCR - OCR Document Processing App (test comment by Claude)
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 
