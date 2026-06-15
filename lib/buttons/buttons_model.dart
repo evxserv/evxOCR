@@ -45,6 +45,15 @@ class ButtonsModel extends FlutterFlowModel<ButtonsWidget> {
       FFUploadedFile(bytes: Uint8List.fromList([]), originalFilename: '');
   String uploadedFileUrl_uploadDataHcssssx = '';
 
+  // SendTicket button state fields
+  bool isDataUploading_ticket = false;
+  FFUploadedFile uploadedLocalFile_ticket =
+      FFUploadedFile(bytes: Uint8List.fromList([]), originalFilename: '');
+  String uploadedFileUrl_ticket = '';
+
+  // Stores action output result for [Backend Call - API (claudeTicket)] action in SendTicket button.
+  ApiCallResponse? ticketClaudeResult;
+
   @override
   void initState(BuildContext context) {}
 
