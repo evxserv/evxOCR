@@ -111,7 +111,7 @@ class ClaudeTicketCall {
   }) async {
     return ApiManager.instance.makeApiCall(
       callName: 'claudeTicket',
-      apiUrl: 'https://evx-cloud-claude-56d866b888f5.herokuapp.com/ticket',
+      apiUrl: 'https://xkkzvz-8083.csb.app/ticket',
       callType: ApiCallType.POST,
       headers: {},
       params: {
@@ -136,7 +136,7 @@ class TicketOcrCall {
   }) async {
     return ApiManager.instance.makeApiCall(
       callName: 'ticketOcr',
-      apiUrl: 'https://evx-cloud-ocr-56d866b888f5.herokuapp.com/ticket',
+      apiUrl: 'https://33z96v-8083.csb.app/ticket',
       callType: ApiCallType.POST,
       headers: {},
       params: {
