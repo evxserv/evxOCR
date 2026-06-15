@@ -103,11 +103,11 @@ class MergedFileCall {
   }
 }
 
-/// Sends ticket image to Claude AI server for structured JSON extraction.
+/// Sends raw OCR text to Claude AI server for structured JSON extraction.
 /// Returns: { ticket_code, total_amount, currency }
 class ClaudeTicketCall {
   static Future<ApiCallResponse> call({
-    FFUploadedFile? file,
+    String? rawText,
   }) async {
     return ApiManager.instance.makeApiCall(
       callName: 'claudeTicket',
@@ -115,7 +115,7 @@ class ClaudeTicketCall {
       callType: ApiCallType.POST,
       headers: {},
       params: {
-        'file': file,
+        'raw_text': rawText,
       },
       bodyType: BodyType.MULTIPART,
       returnBody: true,

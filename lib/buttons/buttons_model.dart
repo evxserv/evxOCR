@@ -49,7 +49,9 @@ class ButtonsModel extends FlutterFlowModel<ButtonsWidget> {
   bool isDataUploading_ticket = false;
   FFUploadedFile uploadedLocalFile_ticket =
       FFUploadedFile(bytes: Uint8List.fromList([]), originalFilename: '');
-  String uploadedFileUrl_ticket = '';
+
+  // Stores Firebase upload URL result for SendTicket button.
+  ApiCallResponse? ticketUploadResult;
 
   // Stores action output result for [Backend Call - API (claudeTicket)] action in SendTicket button.
   ApiCallResponse? ticketClaudeResult;
