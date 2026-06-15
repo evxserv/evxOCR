@@ -103,6 +103,56 @@ class MergedFileCall {
   }
 }
 
+/// Sends ticket image to Claude AI server for structured JSON extraction.
+/// Returns: { ticket_code, total_amount, currency }
+class ClaudeTicketCall {
+  static Future<ApiCallResponse> call({
+    FFUploadedFile? file,
+  }) async {
+    return ApiManager.instance.makeApiCall(
+      callName: 'claudeTicket',
+      apiUrl: 'https://evx-cloud-claude-56d866b888f5.herokuapp.com/ticket',
+      callType: ApiCallType.POST,
+      headers: {},
+      params: {
+        'file': file,
+      },
+      bodyType: BodyType.MULTIPART,
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+}
+
+/// Sends ticket image to OCR server (AWS Textract) and returns raw text.
+/// Returns: { raw_data: [...], raw_text: "..." }
+class TicketOcrCall {
+  static Future<ApiCallResponse> call({
+    FFUploadedFile? file1,
+  }) async {
+    return ApiManager.instance.makeApiCall(
+      callName: 'ticketOcr',
+      apiUrl: 'https://evx-cloud-ocr-56d866b888f5.herokuapp.com/ticket',
+      callType: ApiCallType.POST,
+      headers: {},
+      params: {
+        'file1': file1,
+      },
+      bodyType: BodyType.MULTIPART,
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+}
+
 class ApiPagingParams {
   int nextPageNumber = 0;
   int numItems = 0;
