@@ -10,6 +10,7 @@ import 'schema/single_pictures_record.dart';
 import 'schema/clients_record.dart';
 import 'schema/single_pictures_rashod_record.dart';
 import 'schema/single_pictures_import_record.dart';
+import 'schema/single_pictures_ticket_record.dart';
 
 export 'dart:async' show StreamSubscription;
 export 'package:cloud_firestore/cloud_firestore.dart' hide Order;
@@ -23,6 +24,7 @@ export 'schema/single_pictures_record.dart';
 export 'schema/clients_record.dart';
 export 'schema/single_pictures_rashod_record.dart';
 export 'schema/single_pictures_import_record.dart';
+export 'schema/single_pictures_ticket_record.dart';
 
 /// Functions to query UsersRecords (as a Stream and as a Future).
 Future<int> queryUsersRecordCount({
@@ -204,6 +206,43 @@ Future<List<SinglePicturesImportRecord>> querySinglePicturesImportRecordOnce({
     queryCollectionOnce(
       SinglePicturesImportRecord.collection,
       SinglePicturesImportRecord.fromSnapshot,
+      queryBuilder: queryBuilder,
+      limit: limit,
+      singleRecord: singleRecord,
+    );
+
+/// Functions to query SinglePicturesTicketRecords (as a Stream and as a Future).
+Future<int> querySinglePicturesTicketRecordCount({
+  Query Function(Query)? queryBuilder,
+  int limit = -1,
+}) =>
+    queryCollectionCount(
+      SinglePicturesTicketRecord.collection,
+      queryBuilder: queryBuilder,
+      limit: limit,
+    );
+
+Stream<List<SinglePicturesTicketRecord>> querySinglePicturesTicketRecord({
+  Query Function(Query)? queryBuilder,
+  int limit = -1,
+  bool singleRecord = false,
+}) =>
+    queryCollection(
+      SinglePicturesTicketRecord.collection,
+      SinglePicturesTicketRecord.fromSnapshot,
+      queryBuilder: queryBuilder,
+      limit: limit,
+      singleRecord: singleRecord,
+    );
+
+Future<List<SinglePicturesTicketRecord>> querySinglePicturesTicketRecordOnce({
+  Query Function(Query)? queryBuilder,
+  int limit = -1,
+  bool singleRecord = false,
+}) =>
+    queryCollectionOnce(
+      SinglePicturesTicketRecord.collection,
+      SinglePicturesTicketRecord.fromSnapshot,
       queryBuilder: queryBuilder,
       limit: limit,
       singleRecord: singleRecord,
