@@ -1164,101 +1164,133 @@ class _ButtonsWidgetState extends State<ButtonsWidget> {
                                   0.0, 30.0, 0.0, 0.0),
                               child: FFButtonWidget(
                                 onPressed: () async {
-                                  final selectedMedia =
-                                      await selectMediaWithSourceBottomSheet(
-                                    context: context,
-                                    maxWidth: 4160.00,
-                                    maxHeight: 4160.00,
-                                    imageQuality: 50,
-                                    allowPhoto: true,
-                                  );
-                                  if (selectedMedia != null &&
-                                      selectedMedia.every((m) =>
-                                          validateFileFormat(
-                                              m.storagePath, context))) {
-                                    safeSetState(() => _model
-                                            .isDataUploading_ticket =
-                                        true);
-                                    var selectedUploadedFiles =
-                                        <FFUploadedFile>[];
-
-                                    var downloadUrls = <String>[];
-                                    try {
-                                      showUploadMessage(
-                                        context,
-                                        'Uploading file...',
-                                        showLoading: true,
-                                      );
-                                      selectedUploadedFiles = selectedMedia
-                                          .map((m) => FFUploadedFile(
-                                                name: m.storagePath
-                                                    .split('/')
-                                                    .last,
-                                                bytes: m.bytes,
-                                                height: m.dimensions?.height,
-                                                width: m.dimensions?.width,
-                                                blurHash: m.blurHash,
-                                                originalFilename:
-                                                    m.originalFilename,
-                                              ))
-                                          .toList();
-
-                                      downloadUrls = (await Future.wait(
-                                        selectedMedia.map(
-                                          (m) async => await uploadData(
-                                              m.storagePath, m.bytes),
-                                        ),
-                                      ))
-                                          .where((u) => u != null)
-                                          .map((u) => u!)
-                                          .toList();
-                                    } finally {
-                                      ScaffoldMessenger.of(context)
-                                          .hideCurrentSnackBar();
-                                      _model.isDataUploading_ticket =
-                                          false;
+                                  if (FFAppState().Client != '') {
+                                    final selectedMedia =
+                                        await selectMediaWithSourceBottomSheet(
+                                      context: context,
+                                      maxWidth: 4160.00,
+                                      maxHeight: 4160.00,
+                                      imageQuality: 50,
+                                      allowPhoto: true,
+                                    );
+                                    if (selectedMedia != null &&
+                                        selectedMedia.every((m) =>
+                                            validateFileFormat(
+                                                m.storagePath, context))) {
+                                      safeSetState(() => _model
+                                              .isDataUploading_ticket =
+                                          true);
+                                      var selectedUploadedFiles =
+                                          <FFUploadedFile>[];
+                                      try {
+                                        selectedUploadedFiles = selectedMedia
+                                            .map((m) => FFUploadedFile(
+                                                  name: m.storagePath
+                                                      .split('/')
+                                                      .last,
+                                                  bytes: m.bytes,
+                                                  height: m.dimensions?.height,
+                                                  width: m.dimensions?.width,
+                                                  blurHash: m.blurHash,
+                                                  originalFilename:
+                                                      m.originalFilename,
+                                                ))
+                                            .toList();
+                                      } finally {
+                                        _model.isDataUploading_ticket = false;
+                                      }
+                                      if (selectedUploadedFiles.length ==
+                                          selectedMedia.length) {
+                                        safeSetState(() {
+                                          _model.uploadedLocalFile_ticket =
+                                              selectedUploadedFiles.first;
+                                        });
+                                      } else {
+                                        safeSetState(() {});
+                                        return;
+                                      }
                                     }
-                                    if (selectedUploadedFiles.length ==
-                                            selectedMedia.length &&
-                                        downloadUrls.length ==
-                                            selectedMedia.length) {
-                                      safeSetState(() {
-                                        _model.uploadedLocalFile_ticket =
-                                            selectedUploadedFiles.first;
-                                        _model.uploadedFileUrl_ticket =
-                                            downloadUrls.first;
-                                      });
-                                      showUploadMessage(context, 'Success!');
-                                    } else {
-                                      safeSetState(() {});
-                                      showUploadMessage(
-                                          context, 'Failed to upload data');
-                                      return;
-                                    }
+
+                                    // Шаг 1: Загрузка фото на Firebase через Heroku
+                                    _model.ticketUploadResult =
+                                        await HrkUploadFirebaseCall.call(
+                                      file: _model.uploadedLocalFile_ticket,
+                                    );
+
+                                    // Шаг 2: OCR — получаем raw_text с билета
+                                    final ocrResult =
+                                        await TicketOcrCall.call(
+                                      file1: _model.uploadedLocalFile_ticket,
+                                    );
+                                    final rawText = getJsonField(
+                                      ocrResult?.jsonBody ?? '',
+                                      r'''$.raw_text''',
+                                    ).toString();
+
+                                    // Шаг 3: Claude — структурированный JSON
+                                    _model.ticketClaudeResult =
+                                        await ClaudeTicketCall.call(
+                                      rawText: rawText,
+                                    );
+
+                                    // Шаг 4: Сохраняем в Firestore
+                                    unawaited(
+                                      () async {
+                                        await SinglePicturesTicketRecord
+                                            .collection
+                                            .doc()
+                                            .set(
+                                                createSinglePicturesTicketRecordData(
+                                              fotoURL: getJsonField(
+                                                (_model.ticketUploadResult
+                                                        ?.jsonBody ??
+                                                    ''),
+                                                r'''$[0]''',
+                                              ).toString(),
+                                              response: (_model
+                                                      .ticketClaudeResult
+                                                      ?.jsonBody ??
+                                                  '').toString(),
+                                              client: FFAppState().Client,
+                                            ));
+                                      }(),
+                                    );
+
+                                    await showDialog(
+                                      context: context,
+                                      builder: (alertDialogContext) {
+                                        return AlertDialog(
+                                          content: Text('Ticket Sent'),
+                                          actions: [
+                                            TextButton(
+                                              onPressed: () => Navigator.pop(
+                                                  alertDialogContext),
+                                              child: Text('Ok'),
+                                            ),
+                                          ],
+                                        );
+                                      },
+                                    );
+                                  } else {
+                                    await showDialog(
+                                      context: context,
+                                      builder: (alertDialogContext) {
+                                        return AlertDialog(
+                                          title: Text('Add Client'),
+                                          content: Text('Выбери клиента'),
+                                          actions: [
+                                            TextButton(
+                                              onPressed: () => Navigator.pop(
+                                                  alertDialogContext),
+                                              child: Text('Ok'),
+                                            ),
+                                          ],
+                                        );
+                                      },
+                                    );
                                   }
 
-                                  _model.ticketClaudeResult =
-                                      await ClaudeTicketCall.call(
-                                    file: _model.uploadedLocalFile_ticket,
-                                  );
-
-                                  unawaited(
-                                    () async {
-                                      await SinglePicturesTicketRecord
-                                          .collection
-                                          .doc()
-                                          .set(
-                                              createSinglePicturesTicketRecordData(
-                                            fotoURL: _model
-                                                .uploadedFileUrl_ticket,
-                                            response: (_model
-                                                    .ticketClaudeResult
-                                                    ?.jsonBody ??
-                                                '').toString(),
-                                            client: FFAppState().Client,
-                                          ));
-                                    }(),
-                                  );
+                                  safeSetState(() {});
                                 },
                                 text: 'SendTicket',
                                 options: FFButtonOptions(
