@@ -1240,9 +1240,6 @@ class _ButtonsWidgetState extends State<ButtonsWidget> {
                                         r'''$[0]''',
                                       ).toString();
                                       final responseStr = (_model.ticketClaudeResult?.jsonBody ?? '').toString();
-                                      print('DEBUG ticket fotoUrl: ' + fotoUrl);
-                                      print('DEBUG ticket response: ' + responseStr);
-                                      print('DEBUG ticket client: ' + FFAppState().Client);
                                       await SinglePicturesTicketRecord
                                           .collection
                                           .doc()
@@ -1252,9 +1249,37 @@ class _ButtonsWidgetState extends State<ButtonsWidget> {
                                             response: responseStr,
                                             client: FFAppState().Client,
                                           ));
-                                      print('DEBUG ticket Firestore write SUCCESS');
+                                      await showDialog(
+                                        context: context,
+                                        builder: (alertDialogContext) {
+                                          return AlertDialog(
+                                            title: Text('Firestore OK'),
+                                            content: Text('URL: ' + fotoUrl + '\n\nResponse: ' + responseStr),
+                                            actions: [
+                                              TextButton(
+                                                onPressed: () => Navigator.pop(alertDialogContext),
+                                                child: Text('Ok'),
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                      );
                                     } catch (e) {
-                                      print('DEBUG ticket Firestore write ERROR: ' + e.toString());
+                                      await showDialog(
+                                        context: context,
+                                        builder: (alertDialogContext) {
+                                          return AlertDialog(
+                                            title: Text('Firestore ERROR'),
+                                            content: Text(e.toString()),
+                                            actions: [
+                                              TextButton(
+                                                onPressed: () => Navigator.pop(alertDialogContext),
+                                                child: Text('Ok'),
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                      );
                                     }
 
                                     await showDialog(
