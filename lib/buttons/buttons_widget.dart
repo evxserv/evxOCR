@@ -1288,11 +1288,35 @@ class _ButtonsWidgetState extends State<ButtonsWidget> {
                                       ),
                                     );
 
-                                    // Шаг 1: Загрузка фото на Firebase через Heroku
-                                    _model.ticketUploadResult =
-                                        await HrkUploadFirebaseCall.call(
-                                      file: _model.uploadedLocalFile_ticket,
-                                    );
+                                    // Шаг 1: Загрузка фото на Firebase через Heroku (timeout 60s)
+                                    try {
+                                      _model.ticketUploadResult =
+                                          await HrkUploadFirebaseCall.call(
+                                        file: _model.uploadedLocalFile_ticket,
+                                      ).timeout(const Duration(seconds: 60));
+                                    } on TimeoutException {
+                                      await showDialog(
+                                        context: context,
+                                        builder: (ctx) => AlertDialog(
+                                          title: Text('Шаг 1: TIMEOUT'),
+                                          content: Text('Firebase upload не ответил за 60 сек'),
+                                          actions: [TextButton(onPressed: () => Navigator.pop(ctx), child: Text('Ok'))],
+                                        ),
+                                      );
+                                      safeSetState(() {});
+                                      return;
+                                    } catch (e) {
+                                      await showDialog(
+                                        context: context,
+                                        builder: (ctx) => AlertDialog(
+                                          title: Text('Шаг 1: ERROR'),
+                                          content: Text(e.toString()),
+                                          actions: [TextButton(onPressed: () => Navigator.pop(ctx), child: Text('Ok'))],
+                                        ),
+                                      );
+                                      safeSetState(() {});
+                                      return;
+                                    }
                                     await showDialog(
                                       context: context,
                                       builder: (ctx) => AlertDialog(
@@ -1302,11 +1326,35 @@ class _ButtonsWidgetState extends State<ButtonsWidget> {
                                       ),
                                     );
 
-                                    // Шаг 2: OCR — получаем raw_text с билета
-                                    final ocrResult =
-                                        await TicketOcrCall.call(
-                                      file1: _model.uploadedLocalFile_ticket,
-                                    );
+                                    // Шаг 2: OCR (timeout 60s)
+                                    ApiCallResponse? ocrResult;
+                                    try {
+                                      ocrResult = await TicketOcrCall.call(
+                                        file1: _model.uploadedLocalFile_ticket,
+                                      ).timeout(const Duration(seconds: 60));
+                                    } on TimeoutException {
+                                      await showDialog(
+                                        context: context,
+                                        builder: (ctx) => AlertDialog(
+                                          title: Text('Шаг 2: TIMEOUT'),
+                                          content: Text('OCR не ответил за 60 сек'),
+                                          actions: [TextButton(onPressed: () => Navigator.pop(ctx), child: Text('Ok'))],
+                                        ),
+                                      );
+                                      safeSetState(() {});
+                                      return;
+                                    } catch (e) {
+                                      await showDialog(
+                                        context: context,
+                                        builder: (ctx) => AlertDialog(
+                                          title: Text('Шаг 2: ERROR'),
+                                          content: Text(e.toString()),
+                                          actions: [TextButton(onPressed: () => Navigator.pop(ctx), child: Text('Ok'))],
+                                        ),
+                                      );
+                                      safeSetState(() {});
+                                      return;
+                                    }
                                     final rawText = getJsonField(
                                       ocrResult?.jsonBody ?? '',
                                       r'''$.raw_text''',
@@ -1320,11 +1368,35 @@ class _ButtonsWidgetState extends State<ButtonsWidget> {
                                       ),
                                     );
 
-                                    // Шаг 3: Claude — структурированный JSON
-                                    _model.ticketClaudeResult =
-                                        await ClaudeTicketCall.call(
-                                      rawText: rawText,
-                                    );
+                                    // Шаг 3: Claude (timeout 60s)
+                                    try {
+                                      _model.ticketClaudeResult =
+                                          await ClaudeTicketCall.call(
+                                        rawText: rawText,
+                                      ).timeout(const Duration(seconds: 60));
+                                    } on TimeoutException {
+                                      await showDialog(
+                                        context: context,
+                                        builder: (ctx) => AlertDialog(
+                                          title: Text('Шаг 3: TIMEOUT'),
+                                          content: Text('Claude не ответил за 60 сек'),
+                                          actions: [TextButton(onPressed: () => Navigator.pop(ctx), child: Text('Ok'))],
+                                        ),
+                                      );
+                                      safeSetState(() {});
+                                      return;
+                                    } catch (e) {
+                                      await showDialog(
+                                        context: context,
+                                        builder: (ctx) => AlertDialog(
+                                          title: Text('Шаг 3: ERROR'),
+                                          content: Text(e.toString()),
+                                          actions: [TextButton(onPressed: () => Navigator.pop(ctx), child: Text('Ok'))],
+                                        ),
+                                      );
+                                      safeSetState(() {});
+                                      return;
+                                    }
                                     await showDialog(
                                       context: context,
                                       builder: (ctx) => AlertDialog(
@@ -1334,7 +1406,7 @@ class _ButtonsWidgetState extends State<ButtonsWidget> {
                                       ),
                                     );
 
-                                    // Шаг 4: Сохраняем в Firestore (с timeout 15 сек)
+                                    // Шаг 4: Сохраняем в Firestore (timeout 15s)
                                     try {
                                       final fotoUrl = getJsonField(
                                         (_model.ticketUploadResult?.jsonBody ?? ''),
