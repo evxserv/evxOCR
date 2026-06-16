@@ -1211,6 +1211,30 @@ class _ButtonsWidgetState extends State<ButtonsWidget> {
                                       }
                                     }
 
+                                    // Проверка что фото выбрано
+                                    if (_model.uploadedLocalFile_ticket.bytes == null ||
+                                        _model.uploadedLocalFile_ticket.bytes!.isEmpty) {
+                                      await showDialog(
+                                        context: context,
+                                        builder: (ctx) => AlertDialog(
+                                          title: Text('Фото не выбрано'),
+                                          content: Text('uploadedLocalFile_ticket пустой — фото не было установлено'),
+                                          actions: [TextButton(onPressed: () => Navigator.pop(ctx), child: Text('Ok'))],
+                                        ),
+                                      );
+                                      safeSetState(() {});
+                                      return;
+                                    }
+
+                                    await showDialog(
+                                      context: context,
+                                      builder: (ctx) => AlertDialog(
+                                        title: Text('Фото OK'),
+                                        content: Text('Размер: ' + (_model.uploadedLocalFile_ticket.bytes?.length.toString() ?? '0') + ' bytes\nИмя: ' + (_model.uploadedLocalFile_ticket.name ?? 'null')),
+                                        actions: [TextButton(onPressed: () => Navigator.pop(ctx), child: Text('Ok'))],
+                                      ),
+                                    );
+
                                     // Шаг 1: Загрузка фото на Firebase через Heroku
                                     _model.ticketUploadResult =
                                         await HrkUploadFirebaseCall.call(
