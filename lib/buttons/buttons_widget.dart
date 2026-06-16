@@ -1265,14 +1265,13 @@ class _ButtonsWidgetState extends State<ButtonsWidget> {
                                           pickedFile!;
                                     });
 
-                                    // Проверка что фото выбрано
                                     if (_model.uploadedLocalFile_ticket.bytes == null ||
                                         _model.uploadedLocalFile_ticket.bytes!.isEmpty) {
                                       await showDialog(
                                         context: context,
                                         builder: (ctx) => AlertDialog(
                                           title: Text('Фото не выбрано'),
-                                          content: Text('uploadedLocalFile_ticket пустой — фото не было установлено'),
+                                          content: Text('uploadedLocalFile_ticket пустой'),
                                           actions: [TextButton(onPressed: () => Navigator.pop(ctx), child: Text('Ok'))],
                                         ),
                                       );
@@ -1335,7 +1334,7 @@ class _ButtonsWidgetState extends State<ButtonsWidget> {
                                       ),
                                     );
 
-                                    // Шаг 4: Сохраняем в Firestore
+                                    // Шаг 4: Сохраняем в Firestore (с timeout 15 сек)
                                     try {
                                       final fotoUrl = getJsonField(
                                         (_model.ticketUploadResult?.jsonBody ?? ''),
@@ -1350,7 +1349,11 @@ class _ButtonsWidgetState extends State<ButtonsWidget> {
                                             fotoURL: fotoUrl,
                                             response: responseStr,
                                             client: FFAppState().Client,
-                                          ));
+                                          ))
+                                          .timeout(
+                                            const Duration(seconds: 15),
+                                            onTimeout: () => throw Exception('Firestore timeout (15s)'),
+                                          );
                                       await showDialog(
                                         context: context,
                                         builder: (alertDialogContext) {
