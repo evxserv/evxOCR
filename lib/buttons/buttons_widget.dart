@@ -1350,7 +1350,7 @@ class _ButtonsWidgetState extends State<ButtonsWidget> {
                                       24.0, 0.0, 24.0, 0.0),
                                   iconPadding: EdgeInsetsDirectional.fromSTEB(
                                       0.0, 0.0, 0.0, 0.0),
-                                  color: Color(0xFF1A237E),
+                                  color: Colors.red,
                                   textStyle: FlutterFlowTheme.of(context)
                                       .titleSmall
                                       .override(
