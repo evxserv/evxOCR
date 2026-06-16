@@ -1234,27 +1234,28 @@ class _ButtonsWidgetState extends State<ButtonsWidget> {
                                     );
 
                                     // Шаг 4: Сохраняем в Firestore
-                                    unawaited(
-                                      () async {
-                                        await SinglePicturesTicketRecord
-                                            .collection
-                                            .doc()
-                                            .set(
-                                                createSinglePicturesTicketRecordData(
-                                              fotoURL: getJsonField(
-                                                (_model.ticketUploadResult
-                                                        ?.jsonBody ??
-                                                    ''),
-                                                r'''$[0]''',
-                                              ).toString(),
-                                              response: (_model
-                                                      .ticketClaudeResult
-                                                      ?.jsonBody ??
-                                                  '').toString(),
-                                              client: FFAppState().Client,
-                                            ));
-                                      }(),
-                                    );
+                                    try {
+                                      final fotoUrl = getJsonField(
+                                        (_model.ticketUploadResult?.jsonBody ?? ''),
+                                        r'''$[0]''',
+                                      ).toString();
+                                      final responseStr = (_model.ticketClaudeResult?.jsonBody ?? '').toString();
+                                      print('DEBUG ticket fotoUrl: ' + fotoUrl);
+                                      print('DEBUG ticket response: ' + responseStr);
+                                      print('DEBUG ticket client: ' + FFAppState().Client);
+                                      await SinglePicturesTicketRecord
+                                          .collection
+                                          .doc()
+                                          .set(
+                                              createSinglePicturesTicketRecordData(
+                                            fotoURL: fotoUrl,
+                                            response: responseStr,
+                                            client: FFAppState().Client,
+                                          ));
+                                      print('DEBUG ticket Firestore write SUCCESS');
+                                    } catch (e) {
+                                      print('DEBUG ticket Firestore write ERROR: ' + e.toString());
+                                    }
 
                                     await showDialog(
                                       context: context,
