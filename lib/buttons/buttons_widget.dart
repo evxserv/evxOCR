@@ -1216,6 +1216,14 @@ class _ButtonsWidgetState extends State<ButtonsWidget> {
                                         await HrkUploadFirebaseCall.call(
                                       file: _model.uploadedLocalFile_ticket,
                                     );
+                                    await showDialog(
+                                      context: context,
+                                      builder: (ctx) => AlertDialog(
+                                        title: Text('Шаг 1: Upload'),
+                                        content: Text('status: ' + (_model.ticketUploadResult?.statusCode?.toString() ?? 'null') + '\nbody: ' + (_model.ticketUploadResult?.jsonBody?.toString() ?? 'null')),
+                                        actions: [TextButton(onPressed: () => Navigator.pop(ctx), child: Text('Ok'))],
+                                      ),
+                                    );
 
                                     // Шаг 2: OCR — получаем raw_text с билета
                                     final ocrResult =
@@ -1226,11 +1234,27 @@ class _ButtonsWidgetState extends State<ButtonsWidget> {
                                       ocrResult?.jsonBody ?? '',
                                       r'''$.raw_text''',
                                     ).toString();
+                                    await showDialog(
+                                      context: context,
+                                      builder: (ctx) => AlertDialog(
+                                        title: Text('Шаг 2: OCR'),
+                                        content: Text('status: ' + (ocrResult?.statusCode?.toString() ?? 'null') + '\nraw_text: ' + rawText),
+                                        actions: [TextButton(onPressed: () => Navigator.pop(ctx), child: Text('Ok'))],
+                                      ),
+                                    );
 
                                     // Шаг 3: Claude — структурированный JSON
                                     _model.ticketClaudeResult =
                                         await ClaudeTicketCall.call(
                                       rawText: rawText,
+                                    );
+                                    await showDialog(
+                                      context: context,
+                                      builder: (ctx) => AlertDialog(
+                                        title: Text('Шаг 3: Claude'),
+                                        content: Text('status: ' + (_model.ticketClaudeResult?.statusCode?.toString() ?? 'null') + '\nbody: ' + (_model.ticketClaudeResult?.jsonBody?.toString() ?? 'null')),
+                                        actions: [TextButton(onPressed: () => Navigator.pop(ctx), child: Text('Ok'))],
+                                      ),
                                     );
 
                                     // Шаг 4: Сохраняем в Firestore
