@@ -45,6 +45,11 @@ class ButtonsModel extends FlutterFlowModel<ButtonsWidget> {
       FFUploadedFile(bytes: Uint8List.fromList([]), originalFilename: '');
   String uploadedFileUrl_uploadDataHcssssx = '';
 
+  bool isDataUploading_uploadDataTicket = false;
+  FFUploadedFile uploadedLocalFile_uploadDataTicket =
+      FFUploadedFile(bytes: Uint8List.fromList([]), originalFilename: '');
+  String uploadedFileUrl_uploadDataTicket = '';
+
   @override
   void initState(BuildContext context) {}
 

@@ -10,6 +10,7 @@ import 'schema/single_pictures_record.dart';
 import 'schema/clients_record.dart';
 import 'schema/single_pictures_rashod_record.dart';
 import 'schema/single_pictures_import_record.dart';
+import 'schema/single_pictures_ticket_record.dart';
 
 export 'dart:async' show StreamSubscription;
 export 'package:cloud_firestore/cloud_firestore.dart' hide Order;
@@ -23,6 +24,7 @@ export 'schema/single_pictures_record.dart';
 export 'schema/clients_record.dart';
 export 'schema/single_pictures_rashod_record.dart';
 export 'schema/single_pictures_import_record.dart';
+export 'schema/single_pictures_ticket_record.dart';
 
 /// Functions to query UsersRecords (as a Stream and as a Future).
 Future<int> queryUsersRecordCount({
