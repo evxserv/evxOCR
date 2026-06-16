@@ -1,4 +1,5 @@
 import '/backend/api_requests/api_calls.dart';
+import 'package:file_picker/file_picker.dart';
 import '/backend/backend.dart';
 import '/backend/firebase_storage/storage.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
@@ -1165,51 +1166,104 @@ class _ButtonsWidgetState extends State<ButtonsWidget> {
                               child: FFButtonWidget(
                                 onPressed: () async {
                                   if (FFAppState().Client != '') {
-                                    final selectedMedia =
-                                        await selectMediaWithSourceBottomSheet(
+                                    // Выбор источника: камера / галерея / файлы
+                                    final source =
+                                        await showModalBottomSheet<String>(
                                       context: context,
-                                      maxWidth: 4160.00,
-                                      maxHeight: 4160.00,
-                                      imageQuality: 50,
-                                      allowPhoto: true,
+                                      builder: (ctx) => SafeArea(
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            ListTile(
+                                              leading: Icon(Icons.camera_alt),
+                                              title: Text('Камера'),
+                                              onTap: () =>
+                                                  Navigator.pop(ctx, 'camera'),
+                                            ),
+                                            ListTile(
+                                              leading:
+                                                  Icon(Icons.photo_library),
+                                              title: Text('Галерея'),
+                                              onTap: () => Navigator.pop(
+                                                  ctx, 'gallery'),
+                                            ),
+                                            ListTile(
+                                              leading: Icon(
+                                                  Icons.insert_drive_file),
+                                              title: Text('Файлы'),
+                                              onTap: () =>
+                                                  Navigator.pop(ctx, 'files'),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
                                     );
-                                    if (selectedMedia != null &&
-                                        selectedMedia.every((m) =>
-                                            validateFileFormat(
-                                                m.storagePath, context))) {
-                                      safeSetState(() => _model
-                                              .isDataUploading_ticket =
-                                          true);
-                                      var selectedUploadedFiles =
-                                          <FFUploadedFile>[];
-                                      try {
-                                        selectedUploadedFiles = selectedMedia
-                                            .map((m) => FFUploadedFile(
-                                                  name: m.storagePath
-                                                      .split('/')
-                                                      .last,
-                                                  bytes: m.bytes,
-                                                  height: m.dimensions?.height,
-                                                  width: m.dimensions?.width,
-                                                  blurHash: m.blurHash,
-                                                  originalFilename:
-                                                      m.originalFilename,
-                                                ))
-                                            .toList();
-                                      } finally {
-                                        _model.isDataUploading_ticket = false;
+
+                                    if (source == null) {
+                                      safeSetState(() {});
+                                      return;
+                                    }
+
+                                    FFUploadedFile? pickedFile;
+
+                                    if (source == 'files') {
+                                      final result = await FilePicker.platform
+                                          .pickFiles(
+                                        type: FileType.custom,
+                                        allowedExtensions: [
+                                          'jpg',
+                                          'jpeg',
+                                          'png',
+                                          'pdf'
+                                        ],
+                                        withData: true,
+                                      );
+                                      if (result != null &&
+                                          result.files.isNotEmpty) {
+                                        final f = result.files.first;
+                                        pickedFile = FFUploadedFile(
+                                          name: f.name,
+                                          bytes: f.bytes,
+                                        );
                                       }
-                                      if (selectedUploadedFiles.length ==
-                                          selectedMedia.length) {
-                                        safeSetState(() {
-                                          _model.uploadedLocalFile_ticket =
-                                              selectedUploadedFiles.first;
-                                        });
-                                      } else {
-                                        safeSetState(() {});
-                                        return;
+                                    } else {
+                                      final selectedMedia =
+                                          await selectMedia(
+                                        maxWidth: 4160.00,
+                                        maxHeight: 4160.00,
+                                        imageQuality: 50,
+                                        mediaSource: source == 'camera'
+                                            ? MediaSource.camera
+                                            : MediaSource.photoGallery,
+                                        multiImage: false,
+                                      );
+                                      if (selectedMedia != null &&
+                                          selectedMedia.isNotEmpty &&
+                                          validateFileFormat(
+                                              selectedMedia.first.storagePath,
+                                              context)) {
+                                        final m = selectedMedia.first;
+                                        pickedFile = FFUploadedFile(
+                                          name: m.storagePath.split('/').last,
+                                          bytes: m.bytes,
+                                          height: m.dimensions?.height,
+                                          width: m.dimensions?.width,
+                                          blurHash: m.blurHash,
+                                          originalFilename: m.originalFilename,
+                                        );
                                       }
                                     }
+
+                                    if (pickedFile == null ||
+                                        (pickedFile.bytes?.isEmpty ?? true)) {
+                                      safeSetState(() {});
+                                      return;
+                                    }
+
+                                    safeSetState(() {
+                                      _model.uploadedLocalFile_ticket =
+                                          pickedFile!;
+                                    });
 
                                     // Проверка что фото выбрано
                                     if (_model.uploadedLocalFile_ticket.bytes == null ||
