@@ -50,6 +50,20 @@ class ButtonsModel extends FlutterFlowModel<ButtonsWidget> {
       FFUploadedFile(bytes: Uint8List.fromList([]), originalFilename: '');
   String uploadedFileUrl_uploadDataTicket = '';
 
+  // Multi ticket upload state.
+  bool isDataUploading_uploadDataTicketMulti = false;
+  List<FFUploadedFile> uploadedLocalFiles_uploadDataTicketMulti = [];
+
+  // Stores action output result for [Backend Call - API (hrkUploadFirebase)] action in Button widget.
+  ApiCallResponse? uplloadresponseURL2HrkTicket;
+  int? listIndexTicket = 0;
+
+  // Cicle ticket upload state.
+  bool isDataUploading_uploadDataTicketCicle = false;
+  FFUploadedFile uploadedLocalFile_uploadDataTicketCicle =
+      FFUploadedFile(bytes: Uint8List.fromList([]), originalFilename: '');
+  String uploadedFileUrl_uploadDataTicketCicle = '';
+
   @override
   void initState(BuildContext context) {}
 

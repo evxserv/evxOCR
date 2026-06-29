@@ -1293,6 +1293,287 @@ class _ButtonsWidgetState extends State<ButtonsWidget> {
                             ),
                           ],
                         ),
+                        Padding(
+                          padding: EdgeInsetsDirectional.fromSTEB(
+                              0.0, 25.0, 0.0, 0.0),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.max,
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              FFButtonWidget(
+                                onPressed: () async {
+                                  if (FFAppState().Client != '') {
+                                    final selectedMedia = await selectMedia(
+                                      maxWidth: 4160.00,
+                                      maxHeight: 4160.00,
+                                      imageQuality: 50,
+                                      mediaSource: MediaSource.photoGallery,
+                                      multiImage: true,
+                                    );
+                                    if (selectedMedia != null &&
+                                        selectedMedia.every((m) =>
+                                            validateFileFormat(
+                                                m.storagePath, context))) {
+                                      safeSetState(() => _model
+                                              .isDataUploading_uploadDataTicketMulti =
+                                          true);
+                                      var selectedUploadedFiles =
+                                          <FFUploadedFile>[];
+
+                                      try {
+                                        selectedUploadedFiles = selectedMedia
+                                            .map((m) => FFUploadedFile(
+                                                  name: m.storagePath
+                                                      .split('/')
+                                                      .last,
+                                                  bytes: m.bytes,
+                                                  height: m.dimensions?.height,
+                                                  width: m.dimensions?.width,
+                                                  blurHash: m.blurHash,
+                                                  originalFilename:
+                                                      m.originalFilename,
+                                                ))
+                                            .toList();
+                                      } finally {
+                                        _model.isDataUploading_uploadDataTicketMulti =
+                                            false;
+                                      }
+                                      if (selectedUploadedFiles.length ==
+                                          selectedMedia.length) {
+                                        safeSetState(() {
+                                          _model.uploadedLocalFiles_uploadDataTicketMulti =
+                                              selectedUploadedFiles;
+                                        });
+                                      } else {
+                                        safeSetState(() {});
+                                        return;
+                                      }
+                                    }
+
+                                    _model.listIndexTicket = 0;
+                                    while (functions.newCustomFunction(
+                                        _model.listIndexTicket,
+                                        _model.uploadedLocalFiles_uploadDataTicketMulti
+                                            .length)!) {
+                                      _model.uplloadresponseURL2HrkTicket =
+                                          await HrkUploadFirebaseCall.call(
+                                        file: _model
+                                            .uploadedLocalFiles_uploadDataTicketMulti
+                                            .elementAtOrNull(
+                                                _model.listIndexTicket!),
+                                      );
+
+                                      await SinglePicturesTicketRecord.collection
+                                          .doc()
+                                          .set(
+                                              createSinglePicturesTicketRecordData(
+                                            fotoURL: getJsonField(
+                                              (_model.uplloadresponseURL2HrkTicket
+                                                      ?.jsonBody ??
+                                                  ''),
+                                              r'''$[0]''',
+                                            ).toString(),
+                                            response: 'no_response',
+                                            client: FFAppState().Client,
+                                          ));
+                                      _model.listIndexTicket =
+                                          _model.listIndexTicket! + 1;
+                                    }
+                                    await showDialog(
+                                      context: context,
+                                      builder: (alertDialogContext) {
+                                        return AlertDialog(
+                                          content: Text('Sent'),
+                                          actions: [
+                                            TextButton(
+                                              onPressed: () => Navigator.pop(
+                                                  alertDialogContext),
+                                              child: Text('Ok'),
+                                            ),
+                                          ],
+                                        );
+                                      },
+                                    );
+                                  } else {
+                                    await showDialog(
+                                      context: context,
+                                      builder: (alertDialogContext) {
+                                        return AlertDialog(
+                                          title: Text('Add Client'),
+                                          content: Text('Выбери клиента'),
+                                          actions: [
+                                            TextButton(
+                                              onPressed: () => Navigator.pop(
+                                                  alertDialogContext),
+                                              child: Text('Ok'),
+                                            ),
+                                          ],
+                                        );
+                                      },
+                                    );
+                                  }
+
+                                  safeSetState(() {});
+                                },
+                                text: 'SendMultiTicket',
+                                options: FFButtonOptions(
+                                  width: 180.0,
+                                  height: 144.0,
+                                  padding: EdgeInsetsDirectional.fromSTEB(
+                                      24.0, 0.0, 24.0, 0.0),
+                                  iconPadding: EdgeInsetsDirectional.fromSTEB(
+                                      0.0, 0.0, 0.0, 0.0),
+                                  color: Color(0xFF1A237E),
+                                  textStyle: FlutterFlowTheme.of(context)
+                                      .titleSmall
+                                      .override(
+                                        font: GoogleFonts.readexPro(
+                                          fontWeight:
+                                              FlutterFlowTheme.of(context)
+                                                  .titleSmall
+                                                  .fontWeight,
+                                          fontStyle:
+                                              FlutterFlowTheme.of(context)
+                                                  .titleSmall
+                                                  .fontStyle,
+                                        ),
+                                        color: Colors.white,
+                                        letterSpacing: 0.0,
+                                        fontWeight: FlutterFlowTheme.of(context)
+                                            .titleSmall
+                                            .fontWeight,
+                                        fontStyle: FlutterFlowTheme.of(context)
+                                            .titleSmall
+                                            .fontStyle,
+                                      ),
+                                  elevation: 3.0,
+                                  borderSide: BorderSide(
+                                    color: Colors.transparent,
+                                    width: 1.0,
+                                  ),
+                                  borderRadius: BorderRadius.circular(8.0),
+                                ),
+                              ),
+                              FFButtonWidget(
+                                onPressed: () async {
+                                  while (FFAppState().SendCicle == 1) {
+                                    final selectedMedia = await selectMedia(
+                                      imageQuality: 100,
+                                      multiImage: false,
+                                    );
+                                    if (selectedMedia != null &&
+                                        selectedMedia.every((m) =>
+                                            validateFileFormat(
+                                                m.storagePath, context))) {
+                                      safeSetState(() => _model
+                                              .isDataUploading_uploadDataTicketCicle =
+                                          true);
+                                      var selectedUploadedFiles =
+                                          <FFUploadedFile>[];
+
+                                      var downloadUrls = <String>[];
+                                      try {
+                                        selectedUploadedFiles = selectedMedia
+                                            .map((m) => FFUploadedFile(
+                                                  name: m.storagePath
+                                                      .split('/')
+                                                      .last,
+                                                  bytes: m.bytes,
+                                                  height: m.dimensions?.height,
+                                                  width: m.dimensions?.width,
+                                                  blurHash: m.blurHash,
+                                                  originalFilename:
+                                                      m.originalFilename,
+                                                ))
+                                            .toList();
+
+                                        downloadUrls = (await Future.wait(
+                                          selectedMedia.map(
+                                            (m) async => await uploadData(
+                                                m.storagePath, m.bytes),
+                                          ),
+                                        ))
+                                            .where((u) => u != null)
+                                            .map((u) => u!)
+                                            .toList();
+                                      } finally {
+                                        _model.isDataUploading_uploadDataTicketCicle =
+                                            false;
+                                      }
+                                      if (selectedUploadedFiles.length ==
+                                              selectedMedia.length &&
+                                          downloadUrls.length ==
+                                              selectedMedia.length) {
+                                        safeSetState(() {
+                                          _model.uploadedLocalFile_uploadDataTicketCicle =
+                                              selectedUploadedFiles.first;
+                                          _model.uploadedFileUrl_uploadDataTicketCicle =
+                                              downloadUrls.first;
+                                        });
+                                      } else {
+                                        safeSetState(() {});
+                                        return;
+                                      }
+                                    }
+
+                                    unawaited(
+                                      () async {
+                                        await SinglePicturesTicketRecord
+                                            .collection
+                                            .doc()
+                                            .set(
+                                                createSinglePicturesTicketRecordData(
+                                              fotoURL: _model
+                                                  .uploadedFileUrl_uploadDataTicketCicle,
+                                              response: 'no_response',
+                                              client: FFAppState().Client,
+                                            ));
+                                      }(),
+                                    );
+                                  }
+                                },
+                                text: 'SendCicleTicket',
+                                options: FFButtonOptions(
+                                  width: 180.0,
+                                  height: 144.0,
+                                  padding: EdgeInsetsDirectional.fromSTEB(
+                                      24.0, 0.0, 24.0, 0.0),
+                                  iconPadding: EdgeInsetsDirectional.fromSTEB(
+                                      0.0, 0.0, 0.0, 0.0),
+                                  color: Color(0xFF1A237E),
+                                  textStyle: FlutterFlowTheme.of(context)
+                                      .titleSmall
+                                      .override(
+                                        font: GoogleFonts.readexPro(
+                                          fontWeight:
+                                              FlutterFlowTheme.of(context)
+                                                  .titleSmall
+                                                  .fontWeight,
+                                          fontStyle:
+                                              FlutterFlowTheme.of(context)
+                                                  .titleSmall
+                                                  .fontStyle,
+                                        ),
+                                        color: Colors.white,
+                                        letterSpacing: 0.0,
+                                        fontWeight: FlutterFlowTheme.of(context)
+                                            .titleSmall
+                                            .fontWeight,
+                                        fontStyle: FlutterFlowTheme.of(context)
+                                            .titleSmall
+                                            .fontStyle,
+                                      ),
+                                  elevation: 3.0,
+                                  borderSide: BorderSide(
+                                    color: Colors.transparent,
+                                    width: 1.0,
+                                  ),
+                                  borderRadius: BorderRadius.circular(8.0),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ],
                     ),
                   ),
